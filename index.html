@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="fi">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Kodin Lämpötila ja Kosteus</title>
+    <script
+      type="text/javascript"
+      src="https://www.gstatic.com/charts/loader.js"
+    ></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f0f4f8;
+        text-align: center;
+        padding: 20px;
+      }
+      h1 {
+        color: #2c3e50;
+      }
+      .cards {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        margin: 30px 0;
+      }
+      .card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        padding: 25px 40px;
+      }
+      .card h2 {
+        margin: 0;
+        font-size: 18px;
+        color: #7f8c8d;
+      }
+      .card p {
+        font-size: 42px;
+        margin: 10px 0 0 0;
+        font-weight: bold;
+      }
+      .temp {
+        color: #e74c3c;
+      }
+      .hum {
+        color: #3498db;
+      }
+      #chart_temp,
+      #chart_hum {
+        max-width: 800px;
+        margin: 20px auto;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🏠 Kodin Lämpötilan ja Kosteuden Seuranta</h1>
+
+    <div class="cards">
+      <div class="card">
+        <h2>Lämpötila</h2>
+        <p class="temp" id="tempValue">-- °C</p>
+      </div>
+      <div class="card">
+        <h2>Kosteus</h2>
+        <p class="hum" id="humValue">-- %</p>
+      </div>
+    </div>
+
+    <div id="chart_temp"></div>
+    <div id="chart_hum"></div>
+
+    <script>
+      const channelID = "3499328";
+      const readApiKey = "U6YNQMBX5AUIYFO4";
+      const numResults = 20;
+
+      google.charts.load("current", { packages: ["corechart"] });
+
+      function fetchData() {
+        const url = `https://api.thingspeak.com/channels/${channelID}/feeds.json?api_key=${readApiKey}&results=${numResults}`;
+
+        fetch(url)
+          .then((response) => response.json())
+          .then((data) => {
+            const feeds = data.feeds;
+            if (feeds.length === 0) return;
+
+            const latest = feeds[feeds.length - 1];
+            document.getElementById("tempValue").innerText =
+              parseFloat(latest.field1).toFixed(1) + " °C";
+            document.getElementById("humValue").innerText =
+              parseFloat(latest.field2).toFixed(1) + " %";
+
+            drawCharts(feeds);
+          })
+          .catch((error) => console.error("Virhe haettaessa dataa:", error));
+      }
+
+      function drawCharts(feeds) {
+        const tempData = new google.visualization.DataTable();
+        tempData.addColumn("string", "Aika");
+        tempData.addColumn("number", "Lämpötila (°C)");
+
+        const humData = new google.visualization.DataTable();
+        humData.addColumn("string", "Aika");
+        humData.addColumn("number", "Kosteus (%)");
+
+        feeds.forEach((feed) => {
+          const time = new Date(feed.created_at).toLocaleTimeString();
+          tempData.addRow([time, parseFloat(feed.field1)]);
+          humData.addRow([time, parseFloat(feed.field2)]);
+        });
+
+        const tempChart = new google.visualization.LineChart(
+          document.getElementById("chart_temp"),
+        );
+        tempChart.draw(tempData, {
+          title: "Lämpötilahistoria",
+          curveType: "function",
+          legend: { position: "bottom" },
+        });
+
+        const humChart = new google.visualization.LineChart(
+          document.getElementById("chart_hum"),
+        );
+        humChart.draw(humData, {
+          title: "Kosteushistoria",
+          curveType: "function",
+          legend: { position: "bottom" },
+          colors: ["#3498db"],
+        });
+      }
+
+      google.charts.setOnLoadCallback(fetchData);
+      setInterval(fetchData, 20000);
+    </script>
+  </body>
+</html>
