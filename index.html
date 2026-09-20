@@ -10,12 +10,12 @@
     <style>
       body {
         font-family: Arial, sans-serif;
-        background-color: #f0f4f8;
+        background-color: #74b7c8;
         text-align: center;
-        padding: 20px;
+        padding: 30px;
       }
       h1 {
-        color: #2c3e50;
+        color: #3a5777;
       }
       .cards {
         display: flex;
@@ -25,17 +25,17 @@
       }
       .card {
         background: white;
-        border-radius: 12px;
+        border-radius: 14px;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        padding: 25px 40px;
+        padding: 30px 40px;
       }
       .card h2 {
         margin: 0;
         font-size: 18px;
-        color: #7f8c8d;
+        color: #809496;
       }
       .card p {
-        font-size: 42px;
+        font-size: 45px;
         margin: 10px 0 0 0;
         font-weight: bold;
       }
@@ -47,8 +47,8 @@
       }
       #chart_temp,
       #chart_hum {
-        max-width: 800px;
-        margin: 20px auto;
+        max-width: 900px;
+        margin: 30px auto;
       }
     </style>
   </head>
@@ -86,10 +86,17 @@
             if (feeds.length === 0) return;
 
             const latest = feeds[feeds.length - 1];
-            document.getElementById("tempValue").innerText =
-              parseFloat(latest.field1).toFixed(1) + " °C";
-            document.getElementById("humValue").innerText =
-              parseFloat(latest.field2).toFixed(1) + " %";
+            const temp = parseFloat(latest.field1);
+            const hum = parseFloat(latest.field2);
+
+            if (!isNaN(temp)) {
+              document.getElementById("tempValue").innerText =
+                temp.toFixed(1) + " °C";
+            }
+            if (!isNaN(hum)) {
+              document.getElementById("humValue").innerText =
+                hum.toFixed(1) + " %";
+            }
 
             drawCharts(feeds);
           })
