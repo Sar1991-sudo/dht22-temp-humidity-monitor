@@ -13,15 +13,15 @@
     {
       "type": "wokwi-dht22",
       "id": "dht1",
-      "top": -76.8,
-      "left": 128.6,
+      "top": -200.8,
+      "left": -150.6,
       "attrs": {}
     }
   ],
   "connections": [
-    ["esp:D4", "dht1:SDA", "green", []],
+    ["esp:4", "dht1:SDA", "green", []],
     ["esp:3V3", "dht1:VCC", "red", []],
-    ["esp:GND", "dht1:GND", "black", []]
+    ["esp:GND.1", "dht1:GND", "black", []]
   ],
   "serialMonitor": {
     "display": "terminal"
