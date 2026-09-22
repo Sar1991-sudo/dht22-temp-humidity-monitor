@@ -10,7 +10,7 @@
     <style>
       body {
         font-family: Arial, sans-serif;
-        background-color: #74b7c8;
+        background-color: #76c5d9;
         text-align: center;
         padding: 30px;
       }
@@ -20,8 +20,8 @@
       .cards {
         display: flex;
         justify-content: center;
-        gap: 30px;
-        margin: 30px 0;
+        gap: 40px;
+        margin: 40px 0;
       }
       .card {
         background: white;
@@ -45,15 +45,48 @@
       .hum {
         color: #3498db;
       }
+      .hum.alert {
+        color: #c0392b;
+      }
       #chart_temp,
       #chart_hum {
         max-width: 900px;
         margin: 30px auto;
       }
+      .threshold-box {
+        background: white;
+        border-radius: 14px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        padding: 15px 25px;
+        display: inline-block;
+        margin-bottom: 20px;
+      }
+      .threshold-box label {
+        font-size: 16px;
+        color: #3a5777;
+      }
+      .threshold-box input {
+        width: 60px;
+        font-size: 16px;
+        padding: 4px;
+        margin-left: 8px;
+      }
+      #alertMsg {
+        color: #c0392b;
+        font-weight: bold;
+        font-size: 18px;
+        min-height: 24px;
+        margin-top: 10px;
+      }
     </style>
   </head>
   <body>
     <h1>🏠 Kodin Lämpötilan ja Kosteuden Seuranta</h1>
+
+    <div class="threshold-box">
+      <label for="thresholdInput">Kosteuden raja-arvo (%):</label>
+      <input type="number" id="thresholdInput" value="60" min="0" max="100" />
+    </div>
 
     <div class="cards">
       <div class="card">
@@ -65,6 +98,8 @@
         <p class="hum" id="humValue">-- %</p>
       </div>
     </div>
+
+    <div id="alertMsg"></div>
 
     <div id="chart_temp"></div>
     <div id="chart_hum"></div>
@@ -96,11 +131,29 @@
             if (!isNaN(hum)) {
               document.getElementById("humValue").innerText =
                 hum.toFixed(1) + " %";
+              checkThreshold(hum);
             }
 
             drawCharts(feeds);
           })
           .catch((error) => console.error("Virhe haettaessa dataa:", error));
+      }
+
+      function checkThreshold(hum) {
+        const threshold = parseFloat(
+          document.getElementById("thresholdInput").value,
+        );
+        const humValueEl = document.getElementById("humValue");
+        const alertEl = document.getElementById("alertMsg");
+
+        if (hum > threshold) {
+          humValueEl.classList.add("alert");
+          alertEl.innerText =
+            "⚠️ Varoitus: kosteus ylittää raja-arvon (" + threshold + " %)!";
+        } else {
+          humValueEl.classList.remove("alert");
+          alertEl.innerText = "";
+        }
       }
 
       function drawCharts(feeds) {
